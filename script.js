@@ -478,7 +478,8 @@ const updatedInputCadence = updateFormElement.querySelector(
 const updatedInputElevation = updateFormElement.querySelector(
   '.form__input--elevation'
 );
-containerWorkouts.append(updatedForm);
+// containerWorkouts.append(updatedForm);
+containerWorkouts.insertAdjacentElement('beforebegin', updatedForm);
 
 class App {
   #map;
@@ -497,10 +498,6 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
-    updatedForm.addEventListener(
-      'submit',
-      this._updateWorkout.bind(this, this.#workouts)
-    );
   }
 
   _getPosition() {
@@ -545,6 +542,7 @@ class App {
     form.classList.remove('hidden');
     inputDistance.focus();
     console.log(form);
+    console.log(mapE);
   }
 
   _hideForm() {
@@ -637,8 +635,11 @@ class App {
   }
 
 
+
   _renderWorkoutMarker(workout) {
     // display marker
+
+
 
     L.marker(workout.coords)
       .addTo(this.#map)
@@ -739,11 +740,6 @@ class App {
   _moveToPopup(e) {
     const workoutEl = e.target.closest('.workout'); // closest method will select the entire closest parent with class .workout
     console.log(workoutEl);
-    // const workoutEdit = workoutEl.querySelector('.workout--edit');
-    // const workoutDelete = workoutEl.querySelector('.workout--delete');
-    // console.log(workoutDelete);
-    // console.log(e.target === workoutDelete);
-    // console.log(workoutEl.dataset.id);
 
     if (!workoutEl) return;
 
@@ -777,7 +773,6 @@ class App {
 
     if (workout.type === 'running') {
       updatedInputCadence.value = workout.cadence;
-      // inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
 
       updatedInputElevation
         .closest('.form__row')
@@ -789,9 +784,6 @@ class App {
 
     if (workout.type === 'cycling') {
       updatedInputElevation.value = workout.elevationGain;
-      // inputElevation
-      //   .closest('.form__row')
-      //   .classList.toggle('form__row--hidden');
 
       updatedInputCadence
         .closest('.form__row')
@@ -801,44 +793,35 @@ class App {
         .classList.remove('form__row--hidden');
     }
 
-    this._getWorkoutToEdition(workout);
+    updatedForm.addEventListener('submit', e => {
+      e.preventDefault();
+      this._getWorkoutToEdition(workout);
+    });
   }
 
   _getWorkoutToEdition(workout) {
-    console.log(workout);
-    return workout
-  }
 
-  _updateWorkout(workouts, e) {
-    e.preventDefault();
-    
+    this.#workouts.forEach(work => {
+      if (work.id === workout.id) {
+        work.type = updatedInputType.value;
+        work.distance = +updatedInputDistance.value;
+        work.duration = +updatedInputDuration.value;
+        work.coords = workout.coords;
 
-    workouts.forEach(work => {
-      console.log(work);
-    })
+        if (work.type === 'running') work.cadence = +updatedInputCadence.value;
+        if (work.type === 'cycling')
+          work.elevationGain = +updatedInputElevation.value;
+        // this.#workouts.push(work);
 
+        this._renderWorkout(workout);
 
-    // this.#workouts.forEach(work => {
-    //   work.id === workout.id;
-
-    //   work.type = updatedInputType.value;
-    //   work.distance = updatedInputDistance.value;
-    //   work.duration = updatedInputDuration.value;
-    //   work.coords = workout.coords;
-
-    //   if (work.type === 'running')
-    //   work.cadence = updatedInputCadence.value;
-    //   if (work.type === 'cycling')
-    //   work.elevationGain = updatedInputElevation.value;
-    //   workout[index] = work
-    // });
-
-    // console.log(workout);
+        this._setLocalStorage();
+        location.reload();
+      }
+    });
   }
 
   _deleteWorkout(workout, html, e) {
-    // const w = containerWorkouts.querySelectorAll('.workout');
-    // console.log(w);
     console.log(workout);
     console.log(this.#workouts);
 
@@ -858,14 +841,10 @@ class App {
 
   _setLocalStorage() {
     localStorage.setItem('workouts', JSON.stringify(this.#workouts));
-    //setItem() jako parametr przyjmuje key-value pair
-    // JSON.stringify() -> zmienia obiekt w string
-
-    // !! when we convert objects to string and then to object they are loosing theirs prototypes, prototypes chain and they are regular objects. They are loosing tjeir inheritance !!
   }
 
   _getLocalStorage() {
-    const data = JSON.parse(localStorage.getItem('workouts')); // convert string to JS
+    const data = JSON.parse(localStorage.getItem('workouts'));
 
     if (!data) return;
 
@@ -877,8 +856,8 @@ class App {
   }
 
   reset() {
-    localStorage.removeItem('workouts'); // removing items by a key
-    location.reload(); // reload the page
+    localStorage.removeItem('workouts');
+    location.reload();
   }
 }
 
