@@ -665,10 +665,10 @@ class App {
                 <h2 class="workout__title">${workout.description}</h2>
                 <div class="workout__actions">
                     <button class="workout--edit">
-                        <img class="img" src="/edit-3.svg" alt="" />
+                        <img class="img" src="edit-3.svg" alt="" />
                     </button>
                     <button class="workout--delete">
-                        <img class="img" src="/trash.svg" alt="" />
+                        <img class="img" src="trash.svg" alt="" />
                     </button>
                 </div>
             </div>
